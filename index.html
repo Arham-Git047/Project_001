@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concord Motors - Advanced Automotive Diagnostics & Repair</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Add Montserrat font import -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Sticky Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        /* Body padding to prevent header overlap */
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            padding-top: 85px;
+        }
+
+        /* Section Spacing */
+        section:not(.hero) {
+            padding: 4rem 0;
+        }
+
+        /* Container Centering */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Center Section Titles */
+        .section__title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        /* Smooth scrolling for navigation links */
+        html {
+            /* scroll-behavior: smooth; */
+        }
+        
+        /* Header hover effect */
+        .header:hover {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 75px;
+            }
+        }
+
+        /* Appointment Popup Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 32px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 32px;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 20px;
+        }
+
+        .modal-body .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .modal-body .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .modal-body .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-body textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-submit-btn {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 16px;
+        }
+
+        .modal-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsive modal */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+            
+            .modal-header {
+                padding: 20px 24px;
+            }
+            
+            .modal-body {
+                padding: 24px;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Contact CTA Section Styles */
+        .contact__cta {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 16px;
+            margin-top: 32px;
+        }
+
+        .contact__cta h3 {
+            color: #1e40af;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .contact__cta p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .contact__cta .btn--lg {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Trust & Experience Section - Two Column Grid Layout */
+        .trust__content {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 3rem;
+            align-items: start;
+            margin-top: 3rem;
+        }
+
+        /* Left Column - Detailed Content */
+        .trust__left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        /* Right Column - High-Impact Content */
+        .trust__right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        /* Enhanced Values Section */
+        .trust__values-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .value-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .value-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+
+        .value-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .value-item h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .value-item p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Enhanced Testimonial */
+        .trust__testimonial {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            color: white;
+            position: relative;
+        }
+
+        .trust__testimonial::before {
+            content: '"';
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.3);
+            position: absolute;
+            top: -0.5rem;
+            left: 1rem;
+            font-family: serif;
+        }
+
+        .trust__testimonial blockquote {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin: 0 0 1rem 0;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .trust__testimonial cite {
+            font-size: 0.95rem;
+            font-weight: 600;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Enhanced Statistics */
+        .trust__stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: white;
+            padding: 2rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-desc {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        /* Enhanced CTA */
+        .trust__cta {
+            width: 100%;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            border: 2px solid #3b82f6;
+        }
+
+        .trust__cta .btn {
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .trust__cta .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Responsive Design for Trust & Experience Section */
+        @media (max-width: 768px) {
+            .trust__content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+
+            .trust__left-column {
+                gap: 2rem;
+            }
+
+            .trust__right-column {
+                gap: 1.5rem;
+                align-items: stretch;
+            }
+
+            .trust__values-title {
+                font-size: 1.5rem;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+
+            .value-item {
+                padding: 1.25rem;
+                text-align: center;
+            }
+
+            .value-icon {
+                font-size: 1.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .value-item h4 {
+                font-size: 1.1rem;
+            }
+
+            .trust__testimonial {
+                padding: 1.5rem;
+                text-align: center;
+            }
+
+            .trust__testimonial::before {
+                top: -0.25rem;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 3rem;
+            }
+
+            .trust__testimonial blockquote {
+                font-size: 1rem;
+                margin-top: 1rem;
+            }
+
+            .stat-item {
+                padding: 1.5rem 1rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 1rem;
+            }
+
+            .trust__cta {
+                padding: 1.5rem;
+            }
+
+            .trust__cta .btn {
+                font-size: 1rem;
+                padding: 0.875rem 1.5rem;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .trust__content {
+                gap: 1.5rem;
+                margin-top: 1.5rem;
+            }
+
+            .trust__left-column,
+            .trust__right-column {
+                gap: 1.25rem;
+            }
+
+            .trust__values-title {
+                font-size: 1.25rem;
+            }
+
+            .value-item {
+                padding: 1rem;
+            }
+
+            .value-item h4 {
+                font-size: 1rem;
+            }
+
+            .trust__testimonial {
+                padding: 1.25rem;
+            }
+
+            .trust__testimonial blockquote {
+                font-size: 0.95rem;
+            }
+
+            .stat-item {
+                padding: 1.25rem 0.75rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .trust__cta {
+                padding: 1.25rem;
+            }
+        }
+
+        /* Form Helper Text Styling */
+        .form-helper {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .form-helper::before {
+            content: "💡 ";
+            margin-right: 0.25rem;
+        }
+
+        /* Center-align Appointment Booking Form */
+        .contact__form h3 {
+            text-align: center;
+        }
+        .diagnostic-form .form-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .diagnostic-form .form-label {
+            margin-bottom: 0.5rem;
+        }
+        .diagnostic-form .form-control {
+            width: 100%;
+            max-width: 400px;
+            text-align: left;
+        }
+
+        /* Make text slightly larger throughout the site */
+        html {
+            font-size: 18px;
+        }
+        body {
+            font-size: 1.08rem;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-size: 1.15em;
+        }
+        .section__title,
+        .service-card__title,
+        .trust__values-title,
+        .contact__title,
+        .modal-header h2,
+        .contact__cta h3 {
+            font-size: 1.35em;
+        }
+        .service-card__description,
+        .value-item p,
+        .stat-label,
+        .stat-desc,
+        .contact__cta p,
+        .modal-body,
+        .modal-body .form-label,
+        .modal-body .form-control,
+        .modal-submit-btn {
+            font-size: 1.08em;
+        }
+        .btn,
+        .btn--primary,
+        .btn--lg {
+            font-size: 1.08em;
+        }
+
+        /* Remove emoji spacing from capability titles */
+        .capability h4 {
+            gap: 0;
+        }
+
+        /* WhatsApp Floating Button */
+        #whatsapp-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: #25D366;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            z-index: 9999;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            text-decoration: none;
+        }
+        #whatsapp-float:hover {
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            background: #1ebe5d;
+        }
+        #whatsapp-float svg {
+            width: 32px;
+            height: 32px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav__brand">
+                <h1 class="nav__title">Concord Motors</h1>
+                <span class="nav__tagline">Precision Diagnostics • Expert Repair • Engineering Excellence</span>
+            </div>
+            <ul class="nav__menu">
+                <li><a href="#home" class="nav__link">Home</a></li>
+                <li><a href="#services" class="nav__link">Services</a></li>
+                <li><a href="#trust" class="nav__link">Trust & Experience</a></li>
+                <li><a href="#contact" class="nav__link">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero__content">
+            <div class="hero__text">
+                <h2 class="hero__title">Solving Complex Car Problems, Made Simple.</h2>
+                <p class="hero__subtitle">From frustrating check engine lights to complex electrical issues, our certified experts use advanced diagnostics to pinpoint the exact problem, fast.</p>
+                <div class="hero__benefits">
+                    <span class="benefit-item">Quick & Accurate Fault Finding</span>
+                    <span class="benefit-item">Services for All Major Car Brands</span>
+                    <span class="benefit-item">Transparent & Honest Service</span>
+                </div>
+                <button class="btn btn--primary btn--lg hero__cta">Schedule Diagnostics</button>
+            </div>
+            <div class="hero__image">
+                <img src="C:\Users\admin\OneDrive\Documents\Concord_motors\hero_logo.png" alt="Automotive Engine Diagnostic Schematic" class="hero__diagram">
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section__title">Engineering Services & System Diagnostics</h2>
+            <div class="services__grid">
+                <div class="service-card">
+                    <div class="service-card__icon">⚙️</div>
+                    <h3 class="service-card__title">Engine Management Systems</h3>
+                    <p class="service-card__description">Solving check engine lights, poor fuel economy, and stalling issues with advanced ECU diagnostics.</p>
+                    <div class="service-card__tech">
+                        <span class="tech-spec">OBD2/CAN Bus Compatible</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-card__icon">🔧</div>
+                    <h3 class="service-card__title">Transmission Diagnostics</h3>
+                    <p class="service-card__description">Expert analysis for smooth shifting in automatic, CVT, and manual transmissions.</p>
+                    <div class="service-card__tech">
+                        <span class="tech-spec">Multi-protocol Support</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-card__icon">⚡</div>
+                    <h3 class="service-card__title">Electrical Systems</h3>
+                    <p class="service-card__description">Fixing complex wiring, module, and network issues to restore full vehicle functionality.</p>
+                    <div class="service-card__tech">
+                        <span class="tech-spec">Advanced Oscilloscope</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-card__icon">🚗</div>
+                    <h3 class="service-card__title">Chassis Systems</h3>
+                    <p class="service-card__description">Ensuring your safety with precise diagnostics for ABS, traction control, and brake systems.</p>
+                    <div class="service-card__tech">
+                        <span class="tech-spec">Precision Alignment</span>
+                    </div>
+                </div>
+            </div>
+            <div class="services__cta">
+                <a href="#contact" class="btn btn--primary">Get My Car Fixed</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Capabilities Section -->
+    <section class="technical-features">
+        <div class="container">
+            <h2 class="section__title">Advanced Technical Capabilities</h2>
+            <div class="capabilities__grid">
+                <div class="capability">
+                    <h4>ECU Reprogramming & Coding</h4>
+                    <p>Manufacturer-specific protocols and software updates</p>
+                </div>
+                <div class="capability">
+                    <h4>CAN Bus Network Analysis</h4>
+                    <p>Multi-node communication diagnostics and fault isolation</p>
+                </div>
+                <div class="capability">
+                    <h4>Advanced Diagnostic Procedures</h4>
+                    <p>Component-level testing and signal analysis</p>
+                </div>
+                <div class="capability">
+                    <h4>Technical Service Bulletin Implementation</h4>
+                    <p>Latest manufacturer updates and recalls</p>
+                </div>
+                <div class="capability">
+                    <h4>Precision Measurement & Testing</h4>
+                    <p>Oscilloscope, multimeter, and pressure testing</p>
+                </div>
+                <div class="capability">
+                    <h4>Component-Level Diagnostics</h4>
+                    <p>Sensor validation and actuator testing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust & Experience Section -->
+    <section id="trust" class="trust-experience">
+        <div class="container">
+            <h2 class="section__title">Trusted Along 20+ Years in the Market</h2>
+            <div class="trust__content">
+                <!-- Left Column: Detailed Content -->
+                <div class="trust__left-column">
+                    <!-- Values Section -->
+                    <div class="trust__values">
+                        <h3 class="trust__values-title">Why Customers Trust Concord Motors</h3>
+                        <div class="values-grid">
+                            <div class="value-item">
+                                <div class="value-icon">🏆</div>
+                                <h4>Proven Track Record</h4>
+                                <p>Two decades of consistent quality service and customer satisfaction in the automotive industry.</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">🤝</div>
+                                <h4>Authentic Relationships</h4>
+                                <p>Building genuine connections with customers through transparent communication and honest service.</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">🔧</div>
+                                <h4>Original Solutions</h4>
+                                <p>Maintaining originality in our approach while staying updated with latest automotive technology.</p>
+                            </div>
+                            <div class="value-item">
+                                <div class="value-icon">💯</div>
+                                <h4>Reliable Service</h4>
+                                <p>Consistent delivery of professional automotive diagnostics and repair services you can depend on.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                    <!-- Testimonial Section -->
+                    <div class="trust__testimonial">
+                        <blockquote>
+                            "Concord Motors has been our trusted automotive partner for over 15 years. Their authentic approach and consistent quality have made them the go-to choice for all our vehicle needs."
+                        </blockquote>
+                        <cite>- Satisfied Customer, Kharghar</cite>
+                    </div>
+                </div>
+                
+                <!-- Right Column: High-Impact Content -->
+                <div class="trust__right-column">
+                    <!-- Statistics Section -->
+                    <div class="trust__stats">
+                        <div class="stat-item">
+                            <div class="stat-number">20+</div>
+                            <div class="stat-label">Years of Excellence</div>
+                            <div class="stat-desc">Stable presence in the automotive market</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">5000+</div>
+                            <div class="stat-label">Happy Customers</div>
+                            <div class="stat-desc">Building trust through quality service</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Customer Satisfaction</div>
+                            <div class="stat-desc">Maintaining authenticity and originality</div>
+                    </div>
+                </div>
+                
+                    <!-- CTA Section -->
+                    <div class="trust__cta">
+                        <a href="#contact" class="btn btn--primary">Experience Our Trusted Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <footer id="contact" class="contact">
+        <div class="container">
+            <div class="contact__content">
+                <div class="contact__info">
+                    <h2 class="contact__title">Technical Support & Service</h2>
+                    <div class="contact-item">
+                        <span class="contact-label">Phone:</span>
+                        <span class="contact-value">+91 8850646718, +91 9820548097, +91 8097868560</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Email:</span>
+                        <span class="contact-value">concordmotors@gmail.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Address:</span>
+                        <span class="contact-value">Sector 34A, Pharshipada Near Meghna Heights, Kharghar, Navi Mumbai - 410210</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">Hours:</span>
+                        <span class="contact-value">Mon-Sat, 9:00 AM - 10:00 PM</span>
+                    </div>
+                </div>
+                <div class="contact__map">
+                    <h2>Our Location</h2>
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3773.5678!2d73.0615!3d19.0456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c3c4e8f8f8f8%3A0x8f8f8f8f8f8f8f8f!2sSector%2034A%2C%20Pharshipada%2C%20Near%20Meghna%20Heights%2C%20Kharghar%2C%20Navi%20Mumbai%2C%20Maharashtra%20410210!5e0!3m2!1sen!2sin!4v1703123456789!5m2!1sen!2sin" 
+                        width="100%" 
+                        height="300" 
+                        style="border:0; border-radius: 8px;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Concord Motors Location Map">
+                    </iframe>
+                </div>
+                <div class="contact__cta">
+                    <h3>Ready to Book Your Service?</h3>
+                    <p>Click the button below to schedule your appointment with our expert technicians.</p>
+                    <button class="btn btn--primary btn--lg" data-modal="appointment">Book My Appointment</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Appointment Booking Popup Modal -->
+    <div id="appointmentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book Your Appointment</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="diagnostic-form" id="modalDiagnosticForm">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="form-group">
+                            <label class="form-label" for="modalCustomerName">Your Name</label>
+                            <input type="text" id="modalCustomerName" name="customerName" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="modalPhone">Contact Number</label>
+                            <input type="tel" id="modalPhone" name="phone" class="form-control" placeholder="+91 XXXXX XXXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="modalIssue">Issue to be Solved</label>
+                            <textarea id="modalIssue" name="issue" class="form-control" rows="2" placeholder="Describe the issue (e.g., engine noise, brake problem)" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="modalPreferredTime">Preferred Timing</label>
+                            <select id="modalPreferredTime" name="preferredTime" class="form-control" required>
+                                <option value="">Select preferred time</option>
+                                <option value="09:00-10:00">9:00 AM - 10:00 AM</option>
+                                <option value="10:00-11:00">10:00 AM - 11:00 AM</option>
+                                <option value="11:00-12:00">11:00 AM - 12:00 PM</option>
+                                <option value="12:00-13:00">12:00 PM - 1:00 PM</option>
+                                <option value="13:00-14:00">1:00 PM - 2:00 PM</option>
+                                <option value="14:00-15:00">2:00 PM - 3:00 PM</option>
+                                <option value="15:00-16:00">3:00 PM - 4:00 PM</option>
+                                <option value="16:00-17:00">4:00 PM - 5:00 PM</option>
+                                <option value="17:00-18:00">5:00 PM - 6:00 PM</option>
+                                <option value="18:00-19:00">6:00 PM - 7:00 PM</option>
+                                <option value="19:00-20:00">7:00 PM - 8:00 PM</option>
+                                <option value="20:00-21:00">8:00 PM - 9:00 PM</option>
+                                <option value="21:00-22:00">9:00 PM - 10:00 PM</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn--primary btn--full-width modal-submit-btn">
+                                Book My Appointment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Floating Button -->
+    <a id="whatsapp-float" href="https://wa.me/918097868560" target="_blank" title="Chat with us on WhatsApp" aria-label="WhatsApp">
+        <!-- WhatsApp SVG Icon -->
+        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+            <path d="M16.001 3.2c-7.06 0-12.8 5.74-12.8 12.8 0 2.26.6 4.47 1.74 6.41L3.2 28.8l6.57-1.71c1.86 1.01 3.97 1.54 6.23 1.54h.01c7.06 0 12.8-5.74 12.8-12.8s-5.74-12.8-12.8-12.8zm0 23.04c-2.01 0-3.98-.53-5.68-1.54l-.41-.24-3.9 1.02 1.04-3.8-.26-.39c-1.09-1.66-1.67-3.59-1.67-5.59 0-5.7 4.63-10.33 10.33-10.33s10.33 4.63 10.33 10.33-4.63 10.33-10.33 10.33zm5.65-7.62c-.31-.16-1.81-.89-2.09-.99-.28-.1-.48-.16-.68.16-.2.31-.77.99-.94 1.19-.17.2-.35.23-.66.08-.31-.16-1.31-.48-2.5-1.53-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.13-.63.13-.13.31-.35.47-.53.16-.18.21-.31.31-.52.1-.21.05-.39-.02-.55-.07-.16-.68-1.64-.93-2.25-.24-.58-.49-.5-.68-.51-.18-.01-.39-.01-.6-.01-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.63 0 1.54 1.13 3.03 1.29 3.24.16.21 2.23 3.41 5.41 4.65.76.33 1.36.53 1.83.68.77.25 1.47.21 2.02.13.62-.09 1.81-.74 2.07-1.45.26-.71.26-1.32.18-1.45-.08-.13-.28-.21-.59-.37z"/>
+        </svg>
+    </a>
+
+    <script src="app.js"></script>
+</body>
+</html>
